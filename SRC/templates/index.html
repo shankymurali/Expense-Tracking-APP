@@ -1,0 +1,96 @@
+{% load bulma_tags %}
+<!DOCTYPE html>
+
+<head>
+    <title>Expense Tracker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;500;600;700&family=Inter:wght@100;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    body {
+        font-family: 'Cabin Condensed', sans-serif;
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+
+<body>
+    <div style="display: flex; justify-content: space-between; margin: 1vh; align-items: center;">
+        <div><a href="/">
+            Expense Tracker
+        </a></div>
+        {% if request.user.is_authenticated %}
+            <div style="display: flex; align-items: center; width: 60%; gap: 8px; justify-content: end;">
+                <div style="display: flex; align-items: center; margin-left: 12px; gap: 12px;">
+                    <div><a href="{% url 'manage_category' %}">Manage Categories</a></div>
+                    <div><a href="{% url 'reminders' %}">Reminders</a></div>
+                </div>
+                <div>Logged in as {{ request.user.username }}</div>
+                <a class="button is-link" href="{% url 'logout' %}">Logout</a>
+            </div>
+        {% else %}
+            <div>
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'signup' %}">Signup</a>
+            </div>
+        {% endif %}
+    </div>
+    {% if request.user.is_authenticated %}
+        <div style="display: flex; justify-content: center; flex-direction: column; padding: 12px;">
+            <div style="font-size: 1.2rem; margin-bottom: 2vh; font-weight: bold;">Add Expense</div>
+            <form style="display: flex; justify-content: space-evenly; width: 100%; align-items: center; flex-wrap: wrap;" method="POST" action="{% url 'create_expense' %}">
+                {% csrf_token %}
+                {{ expenseform | bulma }}
+                <div class="field is-grouped" style="margin-top: 2vh;">
+                    <div class="control">
+                        <button class="button is-link">Add</button>
+                    </div>
+                </div>
+            </form>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="font-weight: bold; margin-top: 8px;">
+                    Transactions
+                </div>
+                <form method="POST" action="#">
+                    {% csrf_token %}
+                    <input class="input" type="text" placeholder="Search" style="width: 150px;" name="searchbox-main">
+                    <button class="button is-link" type="submit">Search</button>
+                    <button class="button is-text" onclick="window.location.href='/'; return false;">Clear</button>
+                </form>
+            </div>
+            <div style="display: flex; padding: 10px; flex-direction: column; gap: 1px; margin-top: 6px;" id="expenses">
+                {% for day, exps in expenses.items %}
+                    <div>
+                        <div style="font-weight: semibold; margin-bottom: 6px;">
+                            {{day}}
+                        </div>
+                        {% for exp in exps %}
+                            <div class="box" style="margin-bottom: 2px; margin-top: 2px; padding: 7px; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: bold;">{{exp.category}}</div>
+                                        <div style="font-size: .8rem;">{{exp.description}}</div>
+                                        <div style="font-size: .6rem;">{{exp.username}}</div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <div style="font-size: 1.2rem; font-weight: bold;">$ {{exp.amount}}</div>
+                                        <button style="width: 100px;" class="button is-small is-danger" onclick="window.location.href='{% url 'delete_expense' exp.id %}'; return false;">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div style="margin-top: 8px;"></div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</body>
+
+</html>

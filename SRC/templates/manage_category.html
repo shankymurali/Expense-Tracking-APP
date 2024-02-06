@@ -1,0 +1,74 @@
+{% load bulma_tags %}
+<!DOCTYPE html>
+
+<head>
+    <title>Expense Tracker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin+Condensed:wght@400;500;600;700&family=Inter:wght@100;300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    body {
+        font-family: 'Cabin Condensed', sans-serif;
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+
+<body>
+    <div style="display: flex; justify-content: space-between; margin: 1vh; align-items: center;">
+        <div><a href="/">
+            Expense Tracker
+        </a></div>
+        {% if request.user.is_authenticated %}
+        <div style="display: flex; align-items: center; width: 60%; gap: 8px; justify-content: end;">
+                <div style="display: flex; align-items: center; margin-left: 12px; gap: 12px;">
+                    <div><a href="{% url 'manage_category' %}">Manage Categories</a></div>
+                    <div><a href="{% url 'reminders' %}">Reminders</a></div>
+                </div>
+                <div>Logged in as {{ request.user.username }}</div>
+                <a class="button is-link" href="{% url 'logout' %}">Logout</a>
+            </div>
+        {% else %}
+            <div>
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'signup' %}">Signup</a>
+            </div>
+        {% endif %}
+    </div>
+    {% if request.user.is_authenticated %}
+        <div style="display: flex; justify-content: center; flex-direction: column; padding: 12px;">
+            <div style="font-size: 1.2rem; margin-bottom: 2vh; font-weight: bold;">Add Expense</div>
+            <form method="POST" action="#" style="display: flex; justify-content: space-evenly; width: 100%; align-items: center;">
+                {% csrf_token %}
+                {{ addcategory | bulma }}
+                <div class="field is-grouped" style="margin-top: 2vh;">
+                    <div class="control">
+                        <button class="button is-link">Add</button>
+                    </div>
+                </div>
+            </form>
+            <br><hr><br>
+            <div style="font-size: 1.2rem; margin-bottom: 2vh; font-weight: bold;">Manage Categories</div>
+            <div style="display: flex; justify-content: space-evenly; width: 100%; align-items: center;">
+                {% for cat in categories %}
+                    <div class="field is-grouped" style="margin-top: 2vh; gap: 6px; display: flex; align-items: center;">
+                        <div>
+                            {{cat.name}} <div style="font-size: .8rem;">({{cat.count}} Expenses<br>{% if cat.total_amount != None %} {{CURRENCY}} {{cat.total_amount}} Spent{% else %} No Spending{% endif %})</div>
+                        </div>
+                        <div class="control">
+                            <button class="button is-extra-small is-danger" style="font-size: .7rem;" onclick="location.href='{% url 'delete_category' cat.id %}'">Delete</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</body>
+
+</html>
